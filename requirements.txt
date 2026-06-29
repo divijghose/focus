@@ -1,0 +1,2 @@
+# firedrake
+pyadjoint-ad @ git+https://github.com/divijghose/pyadjoint.git@parametrised_reduced_functional
