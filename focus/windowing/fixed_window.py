@@ -2,6 +2,9 @@ class FixedWindow():
     def __init__(self, window_size, window_stride, pdesolver, optimizer):
         self.window_size = window_size
         self.window_stride = window_stride
+        assert self.window_size > 0, "Window size must be greater than zero."
+        assert self.window_stride > 0, "Window stride must be greater than zero."
+        assert self.window_stride <= self.window_size, "Window stride must be less than or equal to window size."
         self.pdesolver = pdesolver
         self.optimizer = optimizer
         self.current_window_start = 0
