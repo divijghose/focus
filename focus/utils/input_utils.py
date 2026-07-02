@@ -62,7 +62,7 @@ def get_user_config():
         config: dict = read_yaml_inputs(yaml_file_path)
     else:
         print("No .yaml file provided. Reading PETSc inputs.")
-        print("Using default options if not specified.")
+        print("Using default options where not specified.")
         config: dict = read_petsc_inputs()
     return config
 
