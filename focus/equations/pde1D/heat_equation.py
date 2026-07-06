@@ -39,7 +39,6 @@ class HeatEquationSolver1D(PDESolver1D):
         """Set the boundary conditions for the heat equation."""
         self.bcs = [DirichletBC(self.V, bc_value, bc_subdomain+1) for bc_subdomain, bc_value in enumerate(bcs)]
         
-
     def build_solver(self):
         """Build the linear variational solver for the heat equation."""
         u = TrialFunction(self.V)
