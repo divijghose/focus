@@ -43,8 +43,6 @@ class FixedWindow():
         """"
         Run the first window to set up the Reduced Functional and the Optimizer.
         """
-        self.pde_solver.u_new.interpolate(self.pde_solver.u0)
-        self.pde_solver.u_old.assign(self.pde_solver.u_new)
         for m_i in self.window_controls:
             control.interpolate(m_i)
             self.pde_solver.solve()
@@ -59,7 +57,6 @@ class FixedWindow():
         """
         Returns a loop over the time hops within the current window.
         """
-        self.pde_solver.u_old.assign(self.pde_solver.u_new)
         for m_i in self.window_controls:
             control.interpolate(m_i)
             self.pde_solver.solve()
@@ -74,35 +71,9 @@ class FixedWindow():
         for i in range(self.window_stride):
             control.interpolate(self.window_controls[i])
             self.pde_solver.solve()
-            self.pde_solver.u_old.assign(self.pde_solver.u_new)
             self._update_initial_condition()
             
-
-
-
-        # t_actual = time_step_loop(m_opt[i], t_actual)
-        # u_desired.interpolate(u_desired_expr(t_actual))
-        # u_point_wise_error.interpolate(abs(u_desired - u_new))
-        # if pvdOutput:
-        #     outfile.write(u_new, m, u_desired, u_point_wise_error)
-        # l2_error = norm(u_desired - u_new)
-        # linf_error = max(u_point_wise_error.dat.data)
-        # if verbose:
-        #     PETSc.Sys.Print(f"Time {t_actual:.4f}, L2 error: {l2_error:.6f}, L-infinity error: {linf_error:.6f}")
-        # l2_errors.append(l2_error)
-        # linf_errors.append(linf_error)
-        # u_init.interpolate(u_new)
-
-
-
-
-        # t_current = t_init
-        # m.interpolate(m_opt)
-        # solver_heat.solve()
-        # u_old.assign(u_new)
-        # t_current += dt
-        # return t_current
-    
+    #FIXME: This method should be handled by the PDE solver, along with parameter assignment
     def _update_initial_condition(self):
         """
         Set the new initial condition for the PDE solver.
