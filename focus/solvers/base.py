@@ -14,10 +14,7 @@ class Solver(ABC):
     def set_initial_condition(self):
         pass
 
-    @abstractmethod
-    def assign_initial_condition(self):
-        pass
-    
+
     @abstractmethod
     def set_bcs(self):
         pass
@@ -30,16 +27,21 @@ class Solver(ABC):
     def solve(self):
         pass
 
-    @abstractmethod
-    def assign_solution(self):
-        pass
 
     @abstractmethod
     def allocate_control_variables(self):
         pass
 
     @abstractmethod
-    def set_control_variables(self):
+    def set_control(self):
+        pass
+
+    @abstractmethod
+    def allocate_parameters(self):
+        pass
+
+    @abstractmethod
+    def set_parameters(self):
         pass
 
     
