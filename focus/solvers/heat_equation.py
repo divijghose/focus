@@ -1,4 +1,4 @@
-from .base import PDESolver1D
+from .base import Solver
 from firedrake.mesh import MeshGeometry
 from firedrake.function import Function
 from firedrake.functionspaceimpl import WithGeometry
@@ -9,8 +9,8 @@ from firedrake import LinearVariationalProblem, LinearVariationalSolver
 from firedrake.bcs import DirichletBC
 
 
-class HeatEquationSolver1D(PDESolver1D):
-    """A class to solve the 1D heat equation using the Firedrake."""
+class HeatEquationSolver(Solver):
+    """A class to solve the heat equation using Firedrake."""
 
     def __init__(self, mesh: MeshGeometry, function_space: WithGeometry, kappa: float = 1.0, dt: float = 0.1, ):
         """Initialize the HeatEquationSolver1D with a mesh, function space, thermal diffusivity, and time step size."""
@@ -22,8 +22,6 @@ class HeatEquationSolver1D(PDESolver1D):
         self.kappa: float = kappa
         self.solver = None
         self.dt: float = dt
-        self.set_forcing_function()
-        self.set_initial_condition()
     
     def set_forcing_function(self, f = Constant(0.0)):
         """Set the forcing function for the heat equation."""
@@ -34,13 +32,17 @@ class HeatEquationSolver1D(PDESolver1D):
         """Set the initial condition for the heat equation."""
         self.u0 = Function(self.V, name="Initial condition")
         self.u0.interpolate(u0)
+
     
-    def set_bcs(self, bcs: list ):
+    def set_bcs(self, bcs: list = [Constant(0.0)]):
         """Set the boundary conditions for the heat equation."""
         self.bcs = [DirichletBC(self.V, bc_value, bc_subdomain+1) for bc_subdomain, bc_value in enumerate(bcs)]
         
     def build_solver(self):
         """Build the linear variational solver for the heat equation."""
+        self.set_forcing_function()
+        self.set_initial_condition()
+        self.set_bcs()
         u = TrialFunction(self.V)
         v = TestFunction(self.V)
         self.u_old = Function(self.V, name="Solution at previous time step")
@@ -56,7 +58,8 @@ class HeatEquationSolver1D(PDESolver1D):
         """Solve the heat equation for one time step."""
         if self.solver is None:
             raise RuntimeError("Solver has not been built. Call build_solver() before solve().")
-        self.solver.solve()
         self.u_old.assign(self.u_new)
-
+        self.solver.solve()
+    
+    #TODO: Add methods to allocate and set control variables
 
