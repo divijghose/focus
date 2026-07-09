@@ -7,11 +7,11 @@ class BaseLoss(ABC):
         self.pde_solver = pde_solver
  
     @abstractmethod
-    def __call__(self):
+    def __call__(self, control, t_current, t_window):
         pass
     
     @abstractmethod
-    def misfit_loss(self):
+    def misfit_loss(self, t_current, t_window):
         """
         Returns the misfit loss at time t.
         """
@@ -19,7 +19,7 @@ class BaseLoss(ABC):
         
     
     @abstractmethod
-    def control_cost(self):
+    def control_cost(self, control):
         pass
     
     @abstractmethod
