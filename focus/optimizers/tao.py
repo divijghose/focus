@@ -2,7 +2,7 @@ from .base import Optimizer
 from pyadjoint.optimization.tao_solver import TAOSolver, MinimizationProblem
 
 class TAOOptimizer(Optimizer):
-    def __init__(self, rf, parameters: dict):
+    def __init__(self, rf, **parameters: dict):
         super().__init__(rf, parameters)
         self.problem = MinimizationProblem(self.rf)
         self.tao_solver = TAOSolver(self.problem, **self.parameters)
@@ -31,3 +31,7 @@ class TAOOptimizer(Optimizer):
         controls = self.optimize()
         self.check_optimal_controls(controls)
         return controls
+
+    #TODO: Rewrite the optimizer class to align with the updated solver and windowing classes
+    #TODO: Add second order optimization
+    
