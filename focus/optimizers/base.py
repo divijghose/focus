@@ -11,3 +11,10 @@ class Optimizer(ABC):
         Optimize the control variables for the given PDE solver.
         """
         pass
+
+    @abstractmethod
+    def get_optimal_control(self):
+        """
+        Get the optimal control variables after optimization.
+        """
+        pass
