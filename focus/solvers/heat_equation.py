@@ -60,7 +60,10 @@ class HeatEquationSolver(Solver):
         self.set_control()
 
         self.solver = LinearVariationalSolver(LinearVariationalProblem(self.a, self.L, self.u_new, bcs=self.bcs))
-    
+
+        self.allocate_parameters()
+        self.set_parameters()
+        
     def solve(self):
         """Solve the heat equation for one time step."""
         self.u_old.assign(self.u_new)
@@ -69,11 +72,11 @@ class HeatEquationSolver(Solver):
     def allocate_control_variables(self):
         """Allocate the control variable(s) for the heat equation solver."""
         self.num_controls = 1  # Add control to forcing function
-        self.m =   additive_control(self.V, num_controls=self.num_controls)
+        self.control =   additive_control(self.V, num_controls=self.num_controls)
 
     def set_control(self):
         """Set the control variable for the heat equation solver."""
-        self.L += (self.dt*inner(self.m, self.v))*dx
+        self.L += (self.dt*inner(self.control, self.v))*dx
 
     def allocate_parameters(self):
         """Allocate which variables are parameters for the heat equation solver."""
@@ -81,7 +84,7 @@ class HeatEquationSolver(Solver):
     
     def set_parameters(self):
         """Set the parameter values for the heat equation solver."""
-        self.p = self.u_new
+        self.p.interpolate(self.u_new)
     
     def set_desired_solution(self, expression):
         """Return the desired solution at time t."""
