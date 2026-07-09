@@ -26,6 +26,8 @@ class HeatEquationSolver(Solver):
         self.set_forcing_function()
         self.u0 = Function(self.V, name="Initial condition")
         self.set_initial_condition()
+        self.u_desired = Function(self.V, name="Desired solution")
+        
 
         
     #FIXME: Forcing function can be time-dependent, doesn't make sense to initialize a Function each time
@@ -80,4 +82,12 @@ class HeatEquationSolver(Solver):
     def set_parameters(self):
         """Set the parameter values for the heat equation solver."""
         self.p = self.u_new
+    
+    def set_desired_solution(self, expression):
+        """Return the desired solution at time t."""
+        def desired_solution(t):
+            self.u_desired.interpolate(expression(t))
+            return self.u_desired
+        
+        return desired_solution
     
