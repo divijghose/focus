@@ -44,5 +44,9 @@ class Solver(ABC):
     def set_parameters(self):
         pass
 
+    @abstractmethod
+    def set_desired_solution(self, expression):
+        pass
+
     
     
