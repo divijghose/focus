@@ -12,19 +12,20 @@ def read_petsc_inputs():
 
     # Toggle .pvd output
     config["pvdOutput"] = opts.getBool("--pvd-output", default=True)
-    
+
     # Final time
-    config["T"] = opts.getReal("--final-time", default=0.01)  
-    
+    config["T"] = opts.getReal("--final-time", default=0.01)
+
     # Number of time steps in each window
     config["window_size"] = opts.getInt("--window-size", default=5)
 
-    #  Number of time steps by which window steps forward. 
+    #  Number of time steps by which window steps forward.
     # Must be less than or equal to window_size.
-    config["window_step"] = opts.getInt("--window-step", default=1) 
-    assert config["window_step"] <= config["window_size"], \
-        "The window step must be less than or equal to the window size."
-    
+    config["window_step"] = opts.getInt("--window-step", default=1)
+    assert (
+        config["window_step"] <= config["window_size"]
+    ), "The window step must be less than or equal to the window size."
+
     # Output file path
     config["outfile_path"] = opts.getString("--outfile-path", default="output")
 
@@ -38,6 +39,7 @@ def read_petsc_inputs():
     config["misfit_weight"] = opts.getReal("--misfit-weight", default=1.0)
     return config
 
+
 def read_yaml_inputs(yaml_file_path: str):
     """
     Read inputs from a YAML file and return a dictionary of user-defined options.
@@ -46,9 +48,10 @@ def read_yaml_inputs(yaml_file_path: str):
         import yaml
     except ImportError:
         raise ImportError("PyYAML is required to read YAML files.")
-    with open(yaml_file_path, 'r') as file:
+    with open(yaml_file_path, "r") as file:
         config = yaml.safe_load(file)
     return config
+
 
 def get_user_config():
     """
@@ -56,7 +59,8 @@ def get_user_config():
     Otherwise, read PETSc inputs.
     """
     import sys
-    if len(sys.argv) > 1 and sys.argv[1].endswith('.yaml'):
+
+    if len(sys.argv) > 1 and sys.argv[1].endswith(".yaml"):
         print(f"Reading configuration from YAML file: {sys.argv[1]}")
         yaml_file_path = sys.argv[1]
         config: dict = read_yaml_inputs(yaml_file_path)
@@ -65,6 +69,7 @@ def get_user_config():
         print("Using default options where not specified.")
         config: dict = read_petsc_inputs()
     return config
+
 
 def pretty_print_config(config: dict):
     """
@@ -75,6 +80,7 @@ def pretty_print_config(config: dict):
     for key, value in config.items():
         print(f"{key:<20}: {value}")
     print("-" * 30)
+
 
 def print_default_config():
     """
@@ -89,9 +95,10 @@ def print_default_config():
         "outfile_path": "output",
         "summary_csv_path": "",
         "decay_constant": 0.1,
-        "misfit_weight": 1.0
+        "misfit_weight": 1.0,
     }
     pretty_print_config(default_config)
+
 
 if __name__ == "__main__":
     print_default_config()
