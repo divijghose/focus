@@ -3,7 +3,7 @@ from pyadjoint.optimization.tao_solver import TAOSolver, MinimizationProblem
 
 class TAOOptimizer(Optimizer):
     def __init__(self, rf, **parameters: dict):
-        super().__init__(rf, parameters)
+        super().__init__(rf, **parameters)
         self.problem = MinimizationProblem(self.rf)
         self.tao_solver = TAOSolver(self.problem, **self.parameters)
 
