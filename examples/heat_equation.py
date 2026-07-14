@@ -3,13 +3,17 @@ from focus.windowing.fixed_window import FixedWindow
 from focus.optimizers.tao import TAOOptimizer
 from focus.controls import additive_control
 from focus.utils.input_utils import get_user_config, pretty_print_config
-from focus.functionals.base import LossFunctional
+from focus.functionals.loss import LossFunctional
 from firedrake import *
+from firedrake.adjoint import *
+
+continue_annotation()
 
 # Read configuration
 config = get_user_config()
 pretty_print_config(config)
-weighting = {"lambda_t": config["decay_constant"], "misfit_weight": config["misfit_weight"]}
+weighting = {"lambda_t": config["decay_constant"], "control_weight": config["misfit_weight"]} #FIXME: Change misfit_weight to control_weight in config file
+
 
 # Define mesh and function space
 mesh = UnitIntervalMesh(10)
@@ -25,9 +29,9 @@ def forcing_function_expression(x, t):
     """Define the forcing function expression."""
     return exp(-100 * ((x[0] - 0.5) ** 2))
 
-def desired_solution_expression(x, t):
-    """Define the desired solution expression."""
-    return exp(-100 * ((x[0] - 0.5) ** 2)) * exp(t)
+def desired_solution_expression(t):
+    """Define the desired solution at time t."""
+    return exp(-100 * ((x[0] - 0.5) ** 2)) * exp(-t)
 
 # Initialize the PDE solver
 heat_solver = HeatEquationSolver(mesh, V, kappa = 0.1, dt = 0.01)
@@ -39,43 +43,28 @@ heat_solver.build_solver()
 
 # Initialize the forcing function and set it as the control variable
 heat_solver.set_forcing_function(Constant(0.0))
-windowing = FixedWindow(window_size=config["window_size"], window_stride=config["window_step"], pde_solver=heat_solver)
+desired_solution = heat_solver.set_desired_solution(desired_solution_expression)
+windowing = FixedWindow(window_size=1, window_stride=1, pde_solver=heat_solver)
 windowing.initialize_controls(initial_expression=Constant(1.0))
-windowing.run_first_window
 
-exit()
-t = 0.0
-while t < config["T"]:
-    # Run the PDE solver for one time step
-    heat_solver.solve()
-    
-    # Update time
-    t += heat_solver.dt
-    
-    # Print the current time and the maximum value of the solution
-    print(f"Time: {t:.4f}, Max u: {heat_solver.u_new.dat.data.max():.4f}")
-
-
-
-# Build a windowing object
-
-
-# Initialize the loss functional
-loss_functional = LossFunctional(weighting)
-
-
-
+loss_functional = LossFunctional(desired_solution, heat_solver, weighting)
+windowing.run_first_window(loss_functional) # Dummy run of first window to set up the Reduced Functional and the Optimizer
+parameters_tao = { 'method': 'lbfgs',
+                'max_it': 20,
+                'fatol' : 0.0,
+                'frtol' : 0.0,
+                'gatol' : 1e-9,
+                'grtol' : 0.0
+                }
+optimizer = TAOOptimizer(windowing.Jhat, parameters=parameters_tao)
 
 t = 0.0
 while t < config["T"]:
-    # Run the PDE solver for one time step
-    heat_solver.solve()
-    
-    # Update time
-    t += heat_solver.dt
-    
-    # Print the current time and the maximum value of the solution
-    print(f"Time: {t:.4f}, Max u: {heat_solver.u_new.dat.data.max():.4f}")
+    print(windowing.get_window_start_time())
+    windowing.time_hop_loop(loss_functional)
+    windowing.time_step_loop()
 
+    # optimizer.get_optimal_control()
+    t= config["T"] 
 
-exit(0)
+    continue
