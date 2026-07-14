@@ -9,19 +9,22 @@ class LossFunctional(BaseLoss):
    
     # FIXME: There should be a better way to pass the time information
     def __call__(self, control, t_current, t_window):
-        return assemble((self.control_cost(control) + self.misfit_loss(t_current, t_window)))
+       total_loss = assemble((self.control_cost(control) + self.misfit_loss(t_current, t_window)))
+       return total_loss
     
     def misfit_loss(self, t_current, t_window):
         """
         Returns the misfit loss at time t.
         """
         u_desired = self.u_desired(t_current)
-        return (exp(-self.lambda_t*t_window)*inner(u_desired - self.pde_solver.u_new, u_desired - self.pde_solver.u_new))*dx
+        misfit_loss = (exp(-self.lambda_t*t_window)*inner(u_desired - self.pde_solver.u_new, u_desired - self.pde_solver.u_new))*dx
+        return misfit_loss
         
     
     def control_cost(self, control):
-        return self.control_weight*inner(control, control)*dx
-    
+        control_cost=  self.control_weight*inner(control, control)*dx
+        return control_cost
+
     def get_desired_solution(self, t):
         """
         Returns the desired solution at time t.
