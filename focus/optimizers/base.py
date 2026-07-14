@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 class Optimizer(ABC):
-    def __init__(self, rf, parameters: dict):
+    def __init__(self, rf, **parameters: dict):
         self.rf = rf
         self.parameters = parameters
 
