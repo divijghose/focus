@@ -23,9 +23,7 @@ class HeatEquationSolver(Solver):
         self.kappa: float = kappa
         self.dt: float = dt
         self.f = Function(self.V, name="Forcing function")
-        self.set_forcing_function()
         self.u0 = Function(self.V, name="Initial condition")
-        self.set_initial_condition()
         self.u_desired = Function(self.V, name="Desired solution")
         
 
@@ -73,6 +71,7 @@ class HeatEquationSolver(Solver):
         """Allocate the control variable(s) for the heat equation solver."""
         self.num_controls = 1  # Add control to forcing function
         self.control =   additive_control(self.V, num_controls=self.num_controls)
+        print(self.control)
 
     def set_control(self):
         """Set the control variable for the heat equation solver."""
@@ -85,6 +84,7 @@ class HeatEquationSolver(Solver):
     def set_parameters(self):
         """Set the parameter values for the heat equation solver."""
         self.p.interpolate(self.u_new)
+        print(self.p)
     
     def set_desired_solution(self, expression):
         """Return the desired solution at time t."""
