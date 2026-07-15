@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from firedrake import *
-from focus.equations.pde1D.heat_equation import HeatEquationSolver1D
+from focus.solvers.heat_equation import HeatEquationSolver
 
 
 def test_heat_equation_solver_initialization():
@@ -9,11 +9,11 @@ def test_heat_equation_solver_initialization():
     V = FunctionSpace(mesh, "CG", 2)
     kappa = 1.0
     dt = 0.1
-    heat_solver = HeatEquationSolver1D(mesh, V, kappa=kappa, dt=dt)
+    heat_solver = HeatEquationSolver(mesh, V, kappa=kappa, dt=dt)
 
     assert isinstance(
-        heat_solver, HeatEquationSolver1D
-    ), "HeatEquationSolver1D instance not created."
+        heat_solver, HeatEquationSolver
+    ), "HeatEquationSolver  instance not created."
     assert heat_solver.kappa == kappa, "Incorrect thermal diffusivity."
     assert heat_solver.dt == dt, "Incorrect time step size."
     assert isinstance(heat_solver.f, Function), "Forcing function not initialized."
@@ -23,7 +23,7 @@ def test_heat_equation_solver_initialization():
 def test_heat_equation_solver_set_forcing_function():
     mesh = UnitIntervalMesh(10)
     V = FunctionSpace(mesh, "CG", 2)
-    heat_solver = HeatEquationSolver1D(mesh, V)
+    heat_solver = HeatEquationSolver(mesh, V)
 
     f_new = Constant(1.0)
     heat_solver.set_forcing_function(f_new)
@@ -44,7 +44,7 @@ def test_heat_equation_solver_set_forcing_function():
 def test_heat_equation_solver_set_initial_condition():
     mesh = UnitIntervalMesh(10)
     V = FunctionSpace(mesh, "CG", 2)
-    heat_solver = HeatEquationSolver1D(mesh, V)
+    heat_solver = HeatEquationSolver(mesh, V)
 
     u0_new = Constant(2.0)
     heat_solver.set_initial_condition(u0_new)
@@ -65,7 +65,7 @@ def test_heat_equation_solver_set_initial_condition():
 def test_heat_equation_set_bcs():
     mesh = UnitIntervalMesh(10)
     V = FunctionSpace(mesh, "CG", 2)
-    heat_solver = HeatEquationSolver1D(mesh, V)
+    heat_solver = HeatEquationSolver(mesh, V)
 
     bc = [0.0, 0.0]
     heat_solver.set_bcs(bc)
@@ -79,7 +79,7 @@ def test_heat_equation_set_bcs():
 def test_heat_equation_solver_build_and_solve():
     mesh = UnitIntervalMesh(10)
     V = FunctionSpace(mesh, "CG", 2)
-    heat_solver = HeatEquationSolver1D(mesh, V)
+    heat_solver = HeatEquationSolver(mesh, V)
     bc = [0.0, 0.0]
     heat_solver.set_bcs(bc)
     heat_solver.build_solver()
