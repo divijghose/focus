@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from focus.equations.pde1D.heat_equation import HeatEquationSolver1D
+from focus.solvers.heat_equation import HeatEquationSolver
 from focus.controls import additive_control
 from firedrake import *
 
@@ -8,7 +8,7 @@ from firedrake import *
 def test_additive_control_assignment():
     mesh = UnitIntervalMesh(10)
     V = FunctionSpace(mesh, "CG", 2)
-    heat_solver = HeatEquationSolver1D(mesh, V, kappa=0.1, dt=0.01)
+    heat_solver = HeatEquationSolver(mesh, V, kappa=0.1, dt=0.01)
     heat_solver.set_forcing_function(Constant(1.0))
     control = additive_control(heat_solver)
     assert control is not None
