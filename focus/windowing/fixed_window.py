@@ -2,8 +2,9 @@ from .base import Windowing
 from firedrake.function import Function
 from firedrake import Constant
 from pyadjoint import ReducedFunctional
-from firedrake.adjoint import pause_annotation, Control, get_working_tape
-
+from pyadjoint import pause_annotation, Control, get_working_tape, set_working_tape, continue_annotation
+from pyadjoint import *
+from firedrake.adjoint import *
 
 class FixedWindow(Windowing):
     def __init__(self, window_size, window_stride, pde_solver):
@@ -81,28 +82,25 @@ class FixedWindow(Windowing):
         """
         t_current = 0
         t_window = 0
-
-        for i in range(self.window_size):
-            if self.pde_solver.num_controls > 1:
-                for j in range(self.pde_solver.num_controls):
-                    self.pde_solver.control[j].project(self.window_controls[j][i])
-            else:
-                self.pde_solver.control.project(self.window_controls[i])
-            self.pde_solver.solve()
+        with set_working_tape() as tape:
+            for i in range(self.window_size):
+                if self.pde_solver.num_controls > 1:
+                    for j in range(self.pde_solver.num_controls):
+                        self.pde_solver.control[j].assign(self.window_controls[j][i])
+                else:
+                    self.pde_solver.control.assign(self.window_controls[i])
+                self.pde_solver.solve()
             # Add the "loss" functional
-            self.J += loss_functional(self.window_controls[i], t_current=1, t_window=1)
-            t_window += self.pde_solver.dt
+            #FIXME: Add += once tests are passing
+                self.J += loss_functional(self.window_controls[i], t_current=1, t_window=1)
+            # self.J = loss_functional(self.pde_solver.control, t_current=1, t_window=1)
+                t_window += self.pde_solver.dt
 
-        self.Jhat = ReducedFunctional(
-            self.J,
-            controls=[Control(m_i) for m_i in self.window_controls],
-            parameters=self.pde_solver.p,
-        )
-        pause_annotation()
-        print(self.Jhat.derivative())
-        tape = get_working_tape()
-        tape.visualise("tape1.pdf")
-        exit()
+            self.Jhat = ReducedFunctional(
+                self.J,
+                controls=[Control(m_i) for m_i in self.window_controls], parameters=self.pde_solver.p
+            )
+ 
 
     # FIXME: Should run first window be called separately?
     # FIXME: The loops below don't advance the window, and don't return the actual time
