@@ -111,6 +111,7 @@ def test_run_first_window():
 
 @pytest.mark.parametrize("root1, root2", [(1.0, 10.0), (2.1, 49.5), (0.0, 56.4)])
 def test_optimization_after_first_window(root1, root2):
+    continue_annotation()
     root1 = root1
     root2 = root2
     solver = DummyPDESolver(root1=root1, root2=root2)
