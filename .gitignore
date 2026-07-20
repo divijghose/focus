@@ -222,3 +222,9 @@ share/*
 **/lint.txt
 
 *.pdf
+*.pvd
+*.vtu
+*.vtk
+*.png
+*.eps
+*.jpg
