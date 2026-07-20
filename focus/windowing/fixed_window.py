@@ -5,6 +5,7 @@ from pyadjoint import ReducedFunctional
 from pyadjoint import pause_annotation, Control, get_working_tape, set_working_tape, continue_annotation
 from pyadjoint import *
 from firedrake.adjoint import *
+import numpy as np
 
 class FixedWindow(Windowing):
     def __init__(self, window_size, window_stride, pde_solver):
@@ -57,7 +58,6 @@ class FixedWindow(Windowing):
             ]
             for m_i in self.window_controls:
                 m_i.interpolate(initial_expression)
-                print(f"comes here: {m_i}")
         else:
             self.window_controls = [
                 [
@@ -83,7 +83,8 @@ class FixedWindow(Windowing):
         t_current = 0
         t_window = 0
         with set_working_tape() as tape:
-            continue_annotation()
+            self.pde_solver.u_new.interpolate(self.pde_solver.p)
+
             for i in range(self.window_size):
                 if self.pde_solver.num_controls > 1:
                     for j in range(self.pde_solver.num_controls):
@@ -92,16 +93,14 @@ class FixedWindow(Windowing):
                     self.pde_solver.control.assign(self.window_controls[i])
                 self.pde_solver.solve()
             # Add the "loss" functional
-            #FIXME: Add += once tests are passing
                 self.J += loss_functional(self.window_controls[i], t_current=1, t_window=1)
-            # self.J = loss_functional(self.pde_solver.control, t_current=1, t_window=1)
                 t_window += self.pde_solver.dt
 
             self.Jhat = ReducedFunctional(
                 self.J,
-                controls=[Control(m_i) for m_i in self.window_controls], parameters=self.pde_solver.p
-            )
-            pause_annotation()
+                controls=[Control(m_i) for m_i in self.window_controls], parameters=self.pde_solver.p)
+
+            
  
 
     # FIXME: Should run first window be called separately?
@@ -145,3 +144,21 @@ class FixedWindow(Windowing):
         """
         self.pde_solver.set_parameters()
         self.Jhat.update_parameters(self.pde_solver.p)
+
+    def reinitialize_window_controls(self, optimal_controls):
+        """
+        Reinitialize the window controls for the next window.
+        """
+        #FIXME: Not implemented for more than 1 control variable
+        if self.pde_solver.num_controls > 1:
+            raise NotImplementedError(
+                "Reinitialization of window controls is not implemented for more than 1 control variable."
+            )
+        else:
+            for i in range(self.window_stride):
+                if i < self.window_size - self.window_stride:
+                    self.window_controls[i].interpolate(optimal_controls[i + self.window_stride])
+                else:
+                    self.window_controls[i].interpolate(Constant(0.0))
+            for i in range(self.window_stride, self.window_size):
+                self.window_controls[i].interpolate(Constant(0.0))
