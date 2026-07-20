@@ -113,7 +113,6 @@ def test_run_first_window():
 def test_optimization_after_first_window(root1, root2):
     root1 = root1
     root2 = root2
-    continue_annotation()
     solver = DummyPDESolver(root1=root1, root2=root2)
     window_size = 1
     window_stride = 1
@@ -124,8 +123,8 @@ def test_optimization_after_first_window(root1, root2):
     loss_functional = DummyLossFunctional( solver)
     
 
+
     fixed_window.run_first_window(loss_functional)
-    pause_annotation()
     assert fixed_window.Jhat is not None
     assert fixed_window.Jhat.derivative() is not None
     tape = get_working_tape()

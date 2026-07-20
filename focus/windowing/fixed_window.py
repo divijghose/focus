@@ -83,6 +83,7 @@ class FixedWindow(Windowing):
         t_current = 0
         t_window = 0
         with set_working_tape() as tape:
+            continue_annotation()
             for i in range(self.window_size):
                 if self.pde_solver.num_controls > 1:
                     for j in range(self.pde_solver.num_controls):
@@ -100,6 +101,7 @@ class FixedWindow(Windowing):
                 self.J,
                 controls=[Control(m_i) for m_i in self.window_controls], parameters=self.pde_solver.p
             )
+            pause_annotation()
  
 
     # FIXME: Should run first window be called separately?
