@@ -12,6 +12,10 @@ class Windowing(ABC):
         ), "Window stride must be less than or equal to window size."
         self.current_window_start = 0
         self.current_window_end = window_size
+        self.window_number = 0
+        self.global_step_time = 0.0  # Global time across all windows, updated after each time step
+        self.global_hop_time = 0.0  # Global time across all windows, updated after each window hop
+        self.window_hop_time = 0.0  # Time within the current window, updated after each time hop
 
     def get_current_window(self):
         """Return the start and end indices of the current window"""

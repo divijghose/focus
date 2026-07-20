@@ -32,7 +32,29 @@ class FixedWindow(Windowing):
         """
         self.current_window_start += self.window_stride
         self.current_window_end += self.window_stride
+        self.window_number += 1
 
+    def reset_times(self):
+        """
+        Resets the global and window times to zero.
+        """
+        self.global_step_time = 0.0
+        self.global_hop_time = 0.0
+        self.window_hop_time = 0.0
+    
+    def reset_local_window_times(self):
+        """
+        Resets the local window times to zero.
+        """
+        self.window_hop_time = 0.0
+    
+    def reset_global_window_times(self):
+        """
+        Resets the global window times to zero.
+        """
+        self.global_hop_time = self.global_step_time
+
+    
     def initialize_controls(self, initial_expression=Constant(0.0)):
         """
         Initialize a list of controls for the fixed window.
@@ -80,8 +102,7 @@ class FixedWindow(Windowing):
         """ "
         Run the first window to set up the Reduced Functional and the Optimizer.
         """
-        t_current = 0
-        t_window = 0
+   
         with set_working_tape() as tape:
             self.pde_solver.u_new.interpolate(self.pde_solver.p)
 
@@ -93,12 +114,15 @@ class FixedWindow(Windowing):
                     self.pde_solver.control.assign(self.window_controls[i])
                 self.pde_solver.solve()
             # Add the "loss" functional
-                self.J += loss_functional(self.window_controls[i], t_current=1, t_window=1)
-                t_window += self.pde_solver.dt
+                self.J += loss_functional(self.window_controls[i], t_current=self.global_hop_time, t_window=self.window_hop_time)
+                self.global_hop_time += self.pde_solver.dt
+                self.window_hop_time += self.pde_solver.dt
 
             self.Jhat = ReducedFunctional(
                 self.J,
                 controls=[Control(m_i) for m_i in self.window_controls], parameters=self.pde_solver.p)
+        pause_annotation()  # Pause the annotation to avoid recording the first window in the tape
+        self.reset_times()
 
             
  
@@ -119,12 +143,14 @@ class FixedWindow(Windowing):
             else:
                 self.pde_solver.control.interpolate(self.window_controls[i])
             self.pde_solver.solve()
+            self.global_hop_time += self.pde_solver.dt
+            self.window_hop_time += self.pde_solver.dt
             # Add the "loss" functional
-            self.J += loss_functional(
-                self.window_controls[i],
-                self.get_window_start_time() + i * self.pde_solver.dt,
-                i * self.pde_solver.dt,
-            )
+            # self.J += loss_functional(
+            #     self.window_controls[i],
+            #     self.get_window_start_time() + i * self.pde_solver.dt,
+            #     i * self.pde_solver.dt,
+            # )
 
     def time_step_loop(self):
         """
@@ -137,6 +163,12 @@ class FixedWindow(Windowing):
             else:
                 self.pde_solver.control.interpolate(self.window_controls[i])
             self.pde_solver.solve()
+            self.global_step_time
+        
+        self.advance_window()
+        self.reset_global_window_times()
+        self.update_parameters()
+        # self.reinitialize_window_controls(self.window_controls)
 
     def update_parameters(self):
         """
