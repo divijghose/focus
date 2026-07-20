@@ -33,6 +33,7 @@ class HeatEquationSolver(Solver):
         self.f = Function(self.V, name="Forcing function")
         self.u0 = Function(self.V, name="Initial condition")
         self.u_desired = Function(self.V, name="Desired solution")
+        
 
     # FIXME: Forcing function can be time-dependent, doesn't make sense to initialize a Function each time
     def set_forcing_function(self, f=Constant(0.0)):
@@ -57,7 +58,6 @@ class HeatEquationSolver(Solver):
         self.v = TestFunction(self.V)
         self.u_old = Function(self.V, name="Solution at previous time step")
         self.u_new = Function(self.V, name="Solution at new time step")
-        self.u_new.interpolate(self.u0)
 
         self.a = (
             self.dt * inner(grad(self.u), grad(self.v)) * self.kappa
@@ -67,13 +67,14 @@ class HeatEquationSolver(Solver):
 
         self.allocate_control_variables()
         self.set_control()
+        self.allocate_parameters()
+        # self.set_parameters()
 
         self.solver = LinearVariationalSolver(
             LinearVariationalProblem(self.a, self.L, self.u_new, bcs=self.bcs)
         )
 
-        self.allocate_parameters()
-        self.set_parameters()
+
 
     def solve(self):
         """Solve the heat equation for one time step."""
@@ -84,7 +85,6 @@ class HeatEquationSolver(Solver):
         """Allocate the control variable(s) for the heat equation solver."""
         self.num_controls = 1  # Add control to forcing function
         self.control = additive_control(self.V, num_controls=self.num_controls)
-        print(self.control)
 
     def set_control(self):
         """Set the control variable for the heat equation solver."""
@@ -92,12 +92,12 @@ class HeatEquationSolver(Solver):
 
     def allocate_parameters(self):
         """Allocate which variables are parameters for the heat equation solver."""
-        self.p = self.u0
+        self.p = Function(self.V, name="Parameters for the heat equation solver")
+        self.p.interpolate(self.u0)
 
     def set_parameters(self):
         """Set the parameter values for the heat equation solver."""
         self.p.interpolate(self.u_new)
-        print(self.p)
 
     def set_desired_solution(self, expression):
         """Return the desired solution at time t."""
