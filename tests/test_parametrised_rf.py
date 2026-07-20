@@ -96,7 +96,6 @@ def test_rf_basic(c_val, p_val, mult_factor):
     result = Jhat(c_val)
     expected = single_control_single_param_expr(c_val, p_val)
     assert np.isclose(result, expected, atol=1e-8)
-    print(f"Result before update: {result}, Expected: {expected}")
 
     # Test parameter update
     p_val = p_val * 2.0
@@ -104,7 +103,6 @@ def test_rf_basic(c_val, p_val, mult_factor):
     result = Jhat(c_val)
     # expected = single_control_single_param_expr(c_val, new_p)
     expected = c_val**3 * p_val  # Adjusted expected value based on the update
-    print(f"Result: {result}, Expected: {expected}")
     assert result == expected
 
     # Test derivative
