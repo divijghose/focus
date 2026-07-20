@@ -23,10 +23,7 @@ class TAOOptimizer(Optimizer):
             raise ValueError(
                 "Number of controls from TAO Solver does not match the number of controls in the Reduced Functional."
             )
-        if not all(isinstance(c, type(self.rf.controls[0])) for c in controls):
-            raise TypeError(
-                "Controls from TAO Solver are not of the same type as the controls in the Reduced Functional."
-            )
+        
 
     def get_optimal_control(self):
         """
@@ -36,5 +33,3 @@ class TAOOptimizer(Optimizer):
         self.check_optimal_controls(controls)
         return controls
 
-    # TODO: Rewrite the optimizer class to align with the updated solver and windowing classes
-    # TODO: Add second order optimization
