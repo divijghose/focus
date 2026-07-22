@@ -38,11 +38,34 @@ def test_output_utils_base():
 
     Jhat, tape = solver.dummy_operation()
     tape_filename = os.path.join(output_utils.output_dir, "tape_plot.pdf")
-    #plot tape either raises exception or creates a file, so we can check if the file exists after calling plot_tape, so catch the exception and check if the file exists
     try:
         output_utils.plot_tape(tape, tape_filename=tape_filename)
         assert os.path.exists(tape_filename)
     except Exception as e:
         with pytest.raises(Exception):
             output_utils.plot_tape(tape, tape_filename=tape_filename)
+
+def test_output_utils_1d():
+    solver = DummyPDESolver()
+    field_dict = {"Solution": solver.u_new, "Control": solver.control}
+    output_utils_1d = OutputUtils1D(field_dict, "./results", vtk_filename="test_vtk")
+    assert isinstance(output_utils_1d, OutputUtilsBase)
+    assert output_utils_1d.field_dict == field_dict
+    assert output_utils_1d.output_dir == "./results"
+    assert output_utils_1d.vtk_filename == "test_vtk"
+
+    # Check if the output directory is created
+    assert os.path.exists(output_utils_1d.output_dir)
+    # Check if the VTK file is created
+    output_utils_1d.save_to_vtk()
+    assert os.path.exists(os.path.join(output_utils_1d.output_dir, "test_vtk.pvd"))
+
+    Jhat, tape = solver.dummy_operation()
+    tape_filename = os.path.join(output_utils_1d.output_dir, "tape_plot.pdf")
+    try:
+        output_utils_1d.plot_tape(tape, tape_filename=tape_filename)
+        assert os.path.exists(tape_filename)
+    except Exception as e:
+        with pytest.raises(Exception):
+            output_utils_1d.plot_tape(tape, tape_filename=tape_filename)
     
