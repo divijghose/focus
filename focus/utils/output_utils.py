@@ -1,6 +1,9 @@
+import matplotlib as mpl
+mpl.use('TkAgg')  # or whatever other backend that you want
+import matplotlib.pyplot as plt
 from firedrake import VTKFile
 from pyadjoint import Tape
-
+import numpy as np
 import os
 
 class OutputUtilsBase:
@@ -76,9 +79,26 @@ class OutputUtils1D(OutputUtilsBase):
         super().__init__(field_dict, output_dir, **kwargs)
 
             
-    def plot_solution(self):
+    def plot_results(self):
         """
         Plot the solution of the PDE solver in 1D.
         """
+        plt.rcParams["text.usetex"] = True
+        plt.rcParams["font.family"] = "serif"
+        plt.rcParams["font.serif"] = ["Computer Modern"]
+        plt.figure(figsize=(8, 6))
+        #TODO: Fill in the plotting script for 1D problems
+        x = self.field_dict["Solution"].function_space().mesh().coordinates.dat.data_ro[:]
+        y = np.sin(np.pi * x)  # Example solution, replace with actual solution from field_dict
+        plt.figure()
+        plt.plot(x, y, label="Solution")
+        plt.xlabel("x")
+        plt.ylabel("u(x)")
+        plt.title("1D Solution Plot")
+        plt.legend()
+        plt.grid()
+        plot_path = os.path.join(self.output_dir, f"{self.plot_filename}.png")
+        plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+        plt.close()
         pass
 
