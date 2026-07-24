@@ -29,6 +29,9 @@ class DummyPDESolver:
     def solve(self):
         self.u_new = (self.control - self.root1)*(self.control - self.root2) + self.p
 
+    def set_parameters(self):
+        self.p = self.p
+
 class DummyLossFunctional:
     def __init__(self,pde_solver):
 
@@ -150,6 +153,48 @@ def test_optimization_after_first_window(root1, root2):
     assert optimal_controls is not None
     assert np.allclose(optimal_controls[0].dat.data, root1), "Optimal control is not as expected."
     
+
+def test_time_advance():
+    continue_annotation()
+    solver = DummyPDESolver()
+    window_size = 3
+    window_stride = 1
+    fixed_window = FixedWindow(window_size=window_size, window_stride=window_stride, pde_solver=solver)
+
+    loss_functional = DummyLossFunctional(solver)
+    fixed_window.initialize_controls()
+    fixed_window.run_first_window(loss_functional)
+    assert fixed_window.get_window_start_time() == 0.0
+    assert fixed_window.get_window_end_time() == window_size * solver.dt
+    # Dummy running first window does not advance time
+    assert fixed_window.global_step_time == 0.0
+    assert fixed_window.global_hop_time == 0.0
+    assert fixed_window.window_hop_time == 0.0
+
+    fixed_window.time_hop_loop(loss_functional)
+    assert fixed_window.global_step_time == 0.0
+    assert fixed_window.global_hop_time == window_size * solver.dt
+    assert fixed_window.window_hop_time == window_size * solver.dt
+
+
+    fixed_window.time_step_loop()
+    assert fixed_window.global_step_time == window_stride * solver.dt
+    assert fixed_window.global_hop_time == window_stride * solver.dt
+    assert fixed_window.window_hop_time == 0.0
+    assert fixed_window.get_window_start_time() == window_stride * solver.dt
+    assert fixed_window.get_window_end_time() == (window_size + window_stride) * solver.dt
+
+    fixed_window.time_hop_loop(loss_functional)
+    assert fixed_window.global_step_time == window_stride * solver.dt
+    assert fixed_window.global_hop_time == (window_size + window_stride) * solver.dt
+    assert fixed_window.window_hop_time == window_size * solver.dt
+
+    fixed_window.time_step_loop()
+    assert fixed_window.global_step_time == 2 * window_stride * solver.dt
+    assert fixed_window.global_hop_time == 2 * window_stride * solver.dt
+    assert fixed_window.window_hop_time == 0.0
+    assert fixed_window.get_window_start_time() == 2 * window_stride * solver.dt
+    assert fixed_window.get_window_end_time() == (window_size + 2 * window_stride) * solver.dt
 
 
 
