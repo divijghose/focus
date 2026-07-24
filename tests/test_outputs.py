@@ -68,4 +68,7 @@ def test_output_utils_1d():
     except Exception as e:
         with pytest.raises(Exception):
             output_utils_1d.plot_tape(tape, tape_filename=tape_filename)
+
+    output_utils_1d.plot_results()  # This should not raise any exceptions
+    assert os.path.exists(output_utils_1d.output_dir)  # Ensure the output directory still exists
     
