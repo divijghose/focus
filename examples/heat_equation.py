@@ -3,11 +3,12 @@ from focus.windowing.fixed_window import FixedWindow
 from focus.optimizers.tao import TAOOptimizer
 from focus.controls import additive_control
 from focus.utils.input_utils import get_user_config, pretty_print_config
+from focus.utils.output_utils import OutputUtils1D
 from focus.functionals.loss import LossFunctional
 from firedrake import *
 from firedrake.adjoint import *
 
-continue_annotation()
+# continue_annotation()
 
 # Read configuration
 config = get_user_config()
@@ -19,7 +20,7 @@ weighting = {
 
 
 # Define mesh and function space
-mesh = UnitIntervalMesh(10)
+mesh = UnitIntervalMesh(80)
 V = FunctionSpace(mesh, "CG", 2)
 
 x = SpatialCoordinate(mesh)
@@ -67,14 +68,19 @@ parameters_tao = {
     "grtol": 0.0,
 }
 optimizer = TAOOptimizer(windowing.Jhat, parameters=parameters_tao)
-
+output_manager = OutputUtils1D({"Solution" : heat_solver.u_new, "Control" : heat_solver.control}, "./results", vtk_filename="test_vtk")
+# save_to_vtk([heat_solver.u0], "./results", "initial_solution")
 t = 0.0
 while t < config["T"]:
     print(windowing.get_window_start_time())
     windowing.time_hop_loop(loss_functional)
+    optimal_controls = optimizer.get_optimal_control()
     windowing.time_step_loop()
+    t =windowing.global_step_time
+    windowing.reinitialize_window_controls(optimal_controls)
+    output_manager.save_to_vtk()
+    print("Comes here")
 
     # optimizer.get_optimal_control()
     t = config["T"]
 
-    continue
