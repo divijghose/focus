@@ -78,6 +78,18 @@ class OutputUtils1D(OutputUtilsBase):
     def __init__(self, field_dict, output_dir, **kwargs):
         super().__init__(field_dict, output_dir, **kwargs)
 
+    def check_fields(self):
+        """
+        Check if the fields in field_dict are suitable for 1D plotting.
+        """
+        given_dict = set(self.field_dict.keys())
+        required_dict = {"Solution", "Desired", "Control", "Error"}
+        missing = required_dict - given_dict
+        if missing:
+            return False, missing
+        else:
+            return True, None
+
             
     def plot_results(self):
         """
@@ -86,19 +98,44 @@ class OutputUtils1D(OutputUtilsBase):
         plt.rcParams["text.usetex"] = True
         plt.rcParams["font.family"] = "serif"
         plt.rcParams["font.serif"] = ["Computer Modern"]
-        plt.figure(figsize=(8, 6))
-        #TODO: Fill in the plotting script for 1D problems
-        x = self.field_dict["Solution"].function_space().mesh().coordinates.dat.data_ro[:]
-        y = np.sin(np.pi * x)  # Example solution, replace with actual solution from field_dict
-        plt.figure()
-        plt.plot(x, y, label="Solution")
-        plt.xlabel("x")
-        plt.ylabel("u(x)")
-        plt.title("1D Solution Plot")
-        plt.legend()
-        plt.grid()
-        plot_path = os.path.join(self.output_dir, f"{self.plot_filename}.png")
-        plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        pass
-
+        plot_path = os.path.join(self.output_dir, self.plot_filename)
+        if self.check_fields()[0]:
+            plt.figure(figsize=(8, 6))
+            fig, ax = plt.subplots(1, 3, figsize=(8, 6))
+            x = self.field_dict["Solution"].function_space().mesh().coordinates.dat.data_ro[:]
+            solution = self.field_dict["Solution"].dat.data_ro[:]
+            desired = self.field_dict["Desired"].dat.data_ro[:]
+            control = self.field_dict["Control"].dat.data_ro[:]
+            error = self.field_dict["Error"].dat.data_ro[:]
+            ax[0].plot(x, solution, label="Solution")
+            ax[0].plot(x, desired, label="Desired")
+            ax[0].set_xlabel("x")
+            ax[0].set_ylabel("u(x)")
+            ax[0].set_title("Solutions")
+            ax[0].legend()
+            ax[1].plot(x, control, label="Control", color='orange')
+            ax[1].set_xlabel("x")
+            ax[1].set_ylabel("Control")
+            ax[1].set_title("Control")
+            ax[2].plot(x, error, label="Error", color='green')
+            ax[2].set_xlabel("x")
+            ax[2].set_ylabel("Error")
+            ax[2].set_title("Error")
+            for a in ax:
+                a.grid()
+            plt.tight_layout()
+            plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+            plt.close()
+        else:
+            fields = self.field_dict.keys()
+            size = len(fields)
+            fig, ax = plt.subplots(1, size, figsize=(8,6))
+            for field in fields:
+                x = self.field_dict["Solution"].function_space().mesh().coordinates.dat.data_ro[:]
+                field_data = self.field_dict[field].dat.data_ro[:]
+                plt.plot(x, field_data, label=field)
+                plt.xlabel("x")
+                plt.ylabel(field)
+                plt.title(f"{field} Plot")
+                plt.grid()
+                plt.tight_layout()
