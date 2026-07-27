@@ -21,10 +21,10 @@ def read_petsc_inputs():
 
     #  Number of time steps by which window steps forward.
     # Must be less than or equal to window_size.
-    config["window_step"] = opts.getInt("--window-step", default=1)
+    config["window_stride"] = opts.getInt("--window-stride", default=1)
     assert (
-        config["window_step"] <= config["window_size"]
-    ), "The window step must be less than or equal to the window size."
+        config["window_stride"] <= config["window_size"]
+    ), "The window stride must be less than or equal to the window size."
 
     # Output file path
     config["outfile_path"] = opts.getString("--outfile-path", default="output")
@@ -36,7 +36,7 @@ def read_petsc_inputs():
     config["decay_constant"] = opts.getReal("--decay-constant", default=0.1)
 
     # Regularization parameter for the deviation of the state from the desired state
-    config["misfit_weight"] = opts.getReal("--misfit-weight", default=1.0)
+    config["control_weight"] = opts.getReal("--control-weight", default=1.0)
     return config
 
 
@@ -91,11 +91,11 @@ def print_default_config():
         "pvdOutput": True,
         "T": 0.01,
         "window_size": 5,
-        "window_step": 1,
+        "window_stride": 1,
         "outfile_path": "output",
         "summary_csv_path": "",
         "decay_constant": 0.1,
-        "misfit_weight": 1.0,
+        "control_weight": 1.0,
     }
     pretty_print_config(default_config)
 
