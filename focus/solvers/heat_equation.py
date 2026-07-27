@@ -8,6 +8,7 @@ from firedrake import inner, grad, dx
 from firedrake import LinearVariationalProblem, LinearVariationalSolver
 from firedrake.bcs import DirichletBC
 from ..controls import *
+from ..utils.error_utils import *
 
 
 class HeatEquationSolver(Solver):
@@ -33,9 +34,10 @@ class HeatEquationSolver(Solver):
         self.f = Function(self.V, name="Forcing function")
         self.u0 = Function(self.V, name="Initial condition")
         self.u_desired = Function(self.V, name="Desired solution")
+        self.point_wise_error = Function(self.V, name="Pointwise error")
+
         
 
-    # FIXME: Forcing function can be time-dependent, doesn't make sense to initialize a Function each time
     def set_forcing_function(self, f=Constant(0.0)):
         """Set the forcing function for the heat equation."""
         self.f.interpolate(f)
@@ -75,12 +77,12 @@ class HeatEquationSolver(Solver):
         )
 
 
-
     def solve(self):
         """Solve the heat equation for one time step."""
         self.u_old.assign(self.u_new)
         self.solver.solve()
 
+    #FIXME: Simplify the interface, user should just be able to inherit HeatEquationSolver and make changes
     def allocate_control_variables(self):
         """Allocate the control variable(s) for the heat equation solver."""
         self.num_controls = 1  # Add control to forcing function
@@ -107,3 +109,11 @@ class HeatEquationSolver(Solver):
             return self.u_desired
 
         return desired_solution
+
+    def errors(self):
+        """Compute the L2 and Linf errors between the current solution and the desired solution."""
+        point_wise_error(self.point_wise_error, self.u_new, self.u_desired)
+        l2_err = l2_error(self.u_new, self.u_desired)
+        linf_err = linf_error(self.point_wise_error)
+        return self.point_wise_error, l2_err, linf_err
+
