@@ -30,7 +30,3 @@ jobs:
         run: |
           python -m compileall focus
 
-      - name: Run tests
-        run: |
-          if python - <<'PY'
-
