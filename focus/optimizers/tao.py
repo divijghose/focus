@@ -3,10 +3,10 @@ from pyadjoint.optimization.tao_solver import TAOSolver, MinimizationProblem
 
 
 class TAOOptimizer(Optimizer):
-    def __init__(self, rf, **parameters: dict):
-        super().__init__(rf, **parameters)
+    def __init__(self, rf, parameters: dict, function_space=None):
+        super().__init__(rf, parameters, function_space)
         self.problem = MinimizationProblem(self.rf)
-        self.tao_solver = TAOSolver(self.problem, **self.parameters)
+        self.tao_solver = TAOSolver(self.problem, self.parameters)
 
     def optimize(self):
         """

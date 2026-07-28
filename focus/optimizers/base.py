@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Any, Optional
 
 
 class Optimizer(ABC):
-    def __init__(self, rf, **parameters: dict):
+    def __init__(self, rf, parameters: dict, function_space: Optional[Any] = None):
         self.rf = rf
         self.parameters = parameters
+        self.function_space = function_space
 
     @abstractmethod
     def optimize(self):
