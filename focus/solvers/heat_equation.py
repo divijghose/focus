@@ -1,3 +1,10 @@
+"""
+heat_equation.py
+
+Solver class for the heat equation for optimal control problems using Firedrake.
+
+Author: Divij Ghose
+"""
 from .base import Solver
 from firedrake.mesh import MeshGeometry
 from firedrake.function import Function
@@ -12,7 +19,20 @@ from ..utils.error_utils import *
 
 
 class HeatEquationSolver(Solver):
-    """A class to solve the heat equation using Firedrake."""
+    """A class to solve the heat equation using Firedrake.
+    This class provides methods to solver the 1 or 2D unsteady heat equation with Dirichlet boundary conditions, 
+    given by:
+
+    .. math::
+        :nowrap:
+
+        \\begin{eqnarray}
+        u_t - \kappa * \Delta u & = &  f,     \\qquad \\text{in} \\qquad \Omega \\times (0, T] \\
+        u                           & = &  g(x), \\qquad \\text{on} \\qquad \partial \Omega \\times (0, T] \\
+        u(\cdot, 0)               & = &  u_0,  \\qquad \\text{in} \\qquad \Omega
+        \\end{eqnarray}
+    """
+
 
     def __init__(
         self,
@@ -36,7 +56,7 @@ class HeatEquationSolver(Solver):
         self.u_desired = Function(self.V, name="Desired solution")
         self.point_wise_error = Function(self.V, name="Pointwise error")
 
-        
+
 
     def set_forcing_function(self, f=Constant(0.0)):
         """Set the forcing function for the heat equation."""
@@ -46,7 +66,7 @@ class HeatEquationSolver(Solver):
         """Set the initial condition for the heat equation."""
         self.u0.interpolate(u0)
 
-    def set_bcs(self, bcs: list = [Constant(0.0)]):
+    def set_bcs(self, bcs: list = [Constant(0.0), Constant(0.0)]):
         """Set the boundary conditions for the heat equation."""
         # TODO: This only accounts for Dirichlet BCs, need to add support for Neumann BCs
         self.bcs = [
