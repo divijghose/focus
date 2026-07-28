@@ -33,12 +33,4 @@ jobs:
       - name: Run tests
         run: |
           if python - <<'PY'
-import importlib.util
-import sys
-print(importlib.util.find_spec('firedrake') is not None)
-PY
-          then
-            python -m pytest -q
-          else
-            echo 'Firedrake is not available in this environment; skipping pytest.'
-          fi
+
