@@ -5,6 +5,7 @@ from firedrake import VTKFile
 from pyadjoint import Tape
 import numpy as np
 import os
+from firedrake import FunctionSpace, Function, Constant, SpatialCoordinate
 
 class OutputUtilsBase:
     """
@@ -98,6 +99,20 @@ class OutputUtils1D(OutputUtilsBase):
         plt.rcParams["text.usetex"] = True
         plt.rcParams["font.family"] = "serif"
         plt.rcParams["font.serif"] = ["Computer Modern"]
+        #FIXME: This is a hack, to project to a piece-wise linear function space for plotting. This should be handled more gracefully in the future. See firedrake.pyplot
+        plotting_function_space = FunctionSpace(self.field_dict["Solution"].function_space().mesh(), "CG", 1)
+        solution_projected = Function(plotting_function_space)
+        solution_projected.interpolate(self.field_dict["Solution"])
+        self.field_dict["Solution"] = solution_projected
+        error_projected = Function(plotting_function_space)
+        error_projected.interpolate(self.field_dict["Error"])
+        self.field_dict["Error"] = error_projected
+        control_projected = Function(plotting_function_space)
+        control_projected.interpolate(self.field_dict["Control"])
+        self.field_dict["Control"] = control_projected
+        desired_projected = Function(plotting_function_space)
+        desired_projected.interpolate(self.field_dict["Desired"])
+        self.field_dict["Desired"] = desired_projected
         plot_path = os.path.join(self.output_dir, self.plot_filename)
         if self.check_fields()[0]:
             plt.figure(figsize=(8, 6))
