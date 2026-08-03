@@ -154,3 +154,17 @@ class OutputUtils1D(OutputUtilsBase):
                 plt.title(f"{field} Plot")
                 plt.grid()
                 plt.tight_layout()
+
+class OutputUtils2D(OutputUtilsBase):
+    """
+    Output utilities for 2D problems.
+    """
+
+    def __init__(self, field_dict, output_dir, **kwargs):
+        super().__init__(field_dict, output_dir, **kwargs)
+
+    def plot_results(self):
+        """
+        Plot the solution of the PDE solver in 2D.
+        """
+        pass
