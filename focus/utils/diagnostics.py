@@ -1,6 +1,7 @@
 """Functions to diagnose the loss functional, optimization and weightings
 """
 from ..functionals.loss import LossFunctional
+from firedrake import *
 
 def _plot_time_decay(window_size, lambda_t):
     """
@@ -46,3 +47,18 @@ if __name__ == "__main__":
     window_size = 10
     lambda_t = 0.4
     diagnose_loss_functional(window_size=window_size, lambda_t=lambda_t)
+
+def _ensemble_mean(fields, ensemble):
+    ensemble_size = ensemble.ensemble_size
+    mean_field = ensemble.allreduce(fields) / ensemble_size
+    return mean_field
+
+
+
+
+def diagnose_ensemble(field, ensemble):
+    mean_field = _ensemble_mean(field, ensemble)
+    if ensemble.ensemble_rank == ensemble.ensemble_size - 1:
+        l2_norm = norm(abs(field - mean_field))
+
+        print(f"Ensemble Mean L2 Norm: {l2_norm}")
