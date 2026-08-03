@@ -53,12 +53,12 @@ def get_ensemble_config():
             yaml_file_path = sys.argv[1]
             config: dict = read_yaml_inputs(yaml_file_path)
             if not config.get("ensemble"):
-                ensemble_config["ensemble_size"] = config["ensemble"].get("ensemble_size", 10)
+                ensemble_config["ensemble_size"] = config["ensemble"].get("ensemble_size", 5)
                 ensemble_config["processes_per_member"] = config["ensemble"].get("processes_per_member", 2)
     else: 
         print("No .yaml file provided. Reading PETSc inputs.")
         print("Using default options where not specified.")
-        ensemble_config["ensemble_size"] = OPTS.getInt("--ensemble-size", default=10)
+        ensemble_config["ensemble_size"] = OPTS.getInt("--ensemble-size", default=5)
         ensemble_config["processes_per_member"]  = OPTS.getInt("--processes-per-member", default=2)
     
     return ensemble_config
