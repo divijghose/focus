@@ -202,3 +202,43 @@ class HeatEquationSolver(Solver):
         linf_err = linf_error(self.point_wise_error)
         return self.point_wise_error, l2_err, linf_err
 
+class HeatEquationSolverEnsemble(HeatEquationSolver):
+    """Ensemble version of the HeatEquationSolver for parallel simulations.
+
+    This class extends HeatEquationSolver to support ensemble simulations,
+    allowing multiple instances of the solver to run in parallel with different
+    initial conditions or parameters.
+    """
+
+    def __init__(
+        self,
+        mesh: MeshGeometry,
+        function_space: WithGeometry,
+        kappa: float = 1.0,
+        dt: float = 0.1,
+        ensemble=None,
+    ):
+        """Initialize the ensemble solver with a mesh, function space, diffusivity, time step, and ensemble.
+
+        :param mesh: Firedrake mesh defining the spatial domain.
+        :type mesh: MeshGeometry
+        :param function_space: Function space used for the state.
+        :type function_space: WithGeometry
+        :param kappa: Thermal diffusivity coefficient.
+        :type kappa: float
+        :param dt: Time step size.
+        :type dt: float
+        :param ensemble: Ensemble object for managing parallel simulations.
+        :type ensemble: Ensemble
+        """
+        super().__init__(mesh, function_space, kappa, dt)
+        if ensemble is None:
+            raise ValueError("Ensemble object must be provided for HeatEquationSolverEnsemble.")
+        self.ensemble = ensemble
+        self.ensemble_size = ensemble.ensemble_size
+        self.ensemble_rank = ensemble.ensemble_rank
+        self.ecomm = ensemble.ensemble_comm
+        self.comm = ensemble.comm
+
+        def build_solver(self)
+        
