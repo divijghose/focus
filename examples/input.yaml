@@ -1,0 +1,13 @@
+verbose: False
+pvdOutput: True
+T: 0.01
+window_size: 5
+window_stride: 1
+outfile_path: "output"
+"summary_csv_path": "output/summary.csv"
+"decay_constant": 0.1
+"control_weight": 1.0
+ensemble:
+  ensemble_size: 10
+  processes_per_member: 2
+  
