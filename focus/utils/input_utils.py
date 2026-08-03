@@ -1,44 +1,67 @@
+import sys
+
 from firedrake.petsc import PETSc
 
+OPTS = PETSc.Options()
 
 def read_petsc_inputs():
     """
     Read PETSc inputs and return a dictionary of user-defined options.
     """
     config: dict = {}
-    opts = PETSc.Options()
     # Console print toggle
-    config["verbose"] = opts.getBool("verbose", False)
+    config["verbose"] = OPTS.getBool("verbose", False)
 
     # Toggle .pvd output
-    config["pvdOutput"] = opts.getBool("--pvd-output", default=True)
+    config["pvdOutput"] = OPTS.getBool("--pvd-output", default=True)
 
     # Final time
-    config["T"] = opts.getReal("--final-time", default=0.01)
+    config["T"] = OPTS.getReal("--final-time", default=0.01)
 
     # Number of time steps in each window
-    config["window_size"] = opts.getInt("--window-size", default=5)
+    config["window_size"] = OPTS.getInt("--window-size", default=5)
 
     #  Number of time steps by which window steps forward.
     # Must be less than or equal to window_size.
-    config["window_stride"] = opts.getInt("--window-stride", default=1)
+    config["window_stride"] = OPTS.getInt("--window-stride", default=1)
     assert (
         config["window_stride"] <= config["window_size"]
     ), "The window stride must be less than or equal to the window size."
 
     # Output file path
-    config["outfile_path"] = opts.getString("--outfile-path", default="output")
+    config["outfile_path"] = OPTS.getString("--outfile-path", default="output")
 
     # Summary CSV file path
-    config["summary_csv_path"] = opts.getString("--summary-csv-path", default="")
+    config["summary_csv_path"] = OPTS.getString("--summary-csv-path", default="")
 
     # Time decay constant for weighting misfit in the loss functional
-    config["decay_constant"] = opts.getReal("--decay-constant", default=0.1)
+    config["decay_constant"] = OPTS.getReal("--decay-constant", default=0.1)
 
     # Regularization parameter for the deviation of the state from the desired state
-    config["control_weight"] = opts.getReal("--control-weight", default=1.0)
+    config["control_weight"] = OPTS.getReal("--control-weight", default=1.0)
+
     return config
 
+def get_ensemble_config():
+    """
+    Get the ensemble configuration from PETSc options.
+    """
+    
+    ensemble_config: dict = {}
+    if len(sys.argv) > 1 and sys.argv[1].endswith(".yaml"):
+            print(f"Reading configuration from YAML file: {sys.argv[1]}")
+            yaml_file_path = sys.argv[1]
+            config: dict = read_yaml_inputs(yaml_file_path)
+            if not config.get("ensemble"):
+                ensemble_config["ensemble_size"] = config["ensemble"].get("ensemble_size", 10)
+                ensemble_config["processes_per_member"] = config["ensemble"].get("processes_per_member", 2)
+    else: 
+        print("No .yaml file provided. Reading PETSc inputs.")
+        print("Using default options where not specified.")
+        ensemble_config["ensemble_size"] = OPTS.getInt("--ensemble-size", default=10)
+        ensemble_config["processes_per_member"]  = OPTS.getInt("--processes-per-member", default=2)
+    
+    return ensemble_config
 
 def read_yaml_inputs(yaml_file_path: str):
     """
@@ -58,7 +81,6 @@ def get_user_config():
     If .yaml file is passed as first argument, load config from it.
     Otherwise, read PETSc inputs.
     """
-    import sys
 
     if len(sys.argv) > 1 and sys.argv[1].endswith(".yaml"):
         print(f"Reading configuration from YAML file: {sys.argv[1]}")
@@ -98,6 +120,8 @@ def print_default_config():
         "control_weight": 1.0,
     }
     pretty_print_config(default_config)
+
+
 
 
 if __name__ == "__main__":
