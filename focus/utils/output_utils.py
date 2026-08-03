@@ -168,3 +168,42 @@ class OutputUtils2D(OutputUtilsBase):
         Plot the solution of the PDE solver in 2D.
         """
         pass
+
+class OutputUtilsEnsemble2D(OutputUtilsBase):
+    """
+    Output utilities for 2D ensemble problems.
+    """
+
+    def __init__(self, field_dict, output_dir, ensemble=None, **kwargs):
+        super().__init__(field_dict, output_dir, **kwargs)
+        if ensemble is None:
+            raise ValueError("Ensemble object must be provided for OutputUtilsEnsemble2D.")
+        self.ensemble = ensemble
+        self.ecomm = ensemble.ensemble_comm
+        self.comm = ensemble.comm
+        self.ensemble_size = ensemble.ensemble_size
+        self.comm_rank = ensemble.ensemble_rank
+
+    def save_to_vtk(self):
+        """
+        Save the solution of the PDE solver to a VTK file for each ensemble member.
+        """
+        
+        if self.vtk_filename == "solution":
+            print("Using default vtk_filename: 'solution'. Consider providing a custom filename.")
+        elif not isinstance(self.vtk_filename, str):
+            raise TypeError("vtk_filename must be a string")
+        # lower case and remove spaces from filename
+        filename = self.vtk_filename.lower().strip().replace(" ", "_")
+        outfile_path = os.path.join(self.output_dir, filename)
+        with self.ensemble.sequential(index=0) as ctx:
+            vtkfile = VTKFile(f"{outfile_path}_{self.comm_rank}.pvd", comm=self.comm)
+
+            for field_name, field in self.field_dict.items():
+                vtkfile.write(field)
+
+    def plot_results(self):
+        """
+        Plot the solution of the PDE solver in 2D for ensemble members.
+        """
+        pass
