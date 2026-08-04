@@ -8,15 +8,15 @@ class Solver(ABC):
         self.V = function_space
 
     @abstractmethod
-    def set_forcing_function(self):
+    def set_forcing_function(self, f_expr, t=0.0):
         pass
 
     @abstractmethod
-    def set_initial_condition(self):
+    def set_initial_condition(self, u0):
         pass
 
     @abstractmethod
-    def set_bcs(self):
+    def set_bcs(self, bcs):
         pass
 
     @abstractmethod
