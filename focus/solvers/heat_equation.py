@@ -75,13 +75,23 @@ class HeatEquationSolver(Solver):
 
 
 
-    def set_forcing_function(self, f=Constant(0.0)):
+    def set_forcing_function(self, f_expr, t=0.0):
         """Set the forcing term for the heat equation.
 
         :param f: A Firedrake expression or function assigned to :attr:`f`.
         :type f: firedrake.function.Function
         """
-        self.f.interpolate(f)
+        if not callable(f_expr):
+            raise TypeError("f_expr must be a callable that takes time and returns a Firedrake expression.")
+        self.f_expr = f_expr
+
+    def update_forcing_function(self, t):
+        """Update the forcing function based on the current time.
+
+        :param t: Current time.
+        :type t: float
+        """
+        self.f.interpolate(self.f_expr(t))
 
     def set_initial_condition(self, u0=Constant(0.0)):
         """Set the initial condition for the state variable.
@@ -240,5 +250,5 @@ class HeatEquationSolverEnsemble(HeatEquationSolver):
         self.ecomm = ensemble.ensemble_comm
         self.comm = ensemble.comm
 
-        def build_solver(self)
+            
         
