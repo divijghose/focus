@@ -102,7 +102,7 @@ class FixedWindow(Windowing):
         """ "
         Run the first window to set up the Reduced Functional and the Optimizer.
         """
-   
+        continue_annotation()  # Continue the annotation to record the first window in the tape
         with set_working_tape() as tape:
             self.pde_solver.u_new.interpolate(self.pde_solver.p)
 
@@ -112,6 +112,7 @@ class FixedWindow(Windowing):
                         self.pde_solver.control[j].assign(self.window_controls[j][i])
                 else:
                     self.pde_solver.control.assign(self.window_controls[i])
+                self.pde_solver.update_forcing_function(self.global_hop_time)
                 self.pde_solver.solve()
             # Add the "loss" functional
                 self.J += loss_functional(self.window_controls[i], t_current=self.global_hop_time, t_window=self.window_hop_time)
@@ -121,36 +122,25 @@ class FixedWindow(Windowing):
             self.Jhat = ReducedFunctional(
                 self.J,
                 controls=[Control(m_i) for m_i in self.window_controls], parameters=self.pde_solver.p)
-        pause_annotation()  # Pause the annotation to avoid recording the first window in the tape
+        pause_annotation()  
         self.reset_times()
 
             
- 
-
-    # FIXME: Should run first window be called separately?
-    # FIXME: The loops below don't advance the window, and don't return the actual time
-    # TODO: Should time_hop_loop and time_step_loop be combined into one function? They are very similar, but the time_hop_loop also computes the loss functional.
-
     def time_hop_loop(self, loss_functional):
         """
         Returns a loop over the time hops within the current window.
         """
-        self.J = 0
         for i in range(self.window_size):
             if self.pde_solver.num_controls > 1:
                 for j in range(self.pde_solver.num_controls):
                     self.pde_solver.control[j].interpolate(self.window_controls[j][i])
             else:
                 self.pde_solver.control.interpolate(self.window_controls[i])
+            self.pde_solver.update_forcing_function(self.global_hop_time)
             self.pde_solver.solve()
             self.global_hop_time += self.pde_solver.dt
             self.window_hop_time += self.pde_solver.dt
-            # Add the "loss" functional
-            # self.J += loss_functional(
-            #     self.window_controls[i],
-            #     self.get_window_start_time() + i * self.pde_solver.dt,
-            #     i * self.pde_solver.dt,
-            # )
+
 
     def time_step_loop(self):
         """
@@ -162,11 +152,13 @@ class FixedWindow(Windowing):
                     self.pde_solver.control[j].interpolate(self.window_controls[j][i])
             else:
                 self.pde_solver.control.interpolate(self.window_controls[i])
+            self.pde_solver.update_forcing_function(self.global_step_time)
             self.pde_solver.solve()
-            self.global_step_time
+            self.global_step_time += self.pde_solver.dt
         
         self.advance_window()
         self.reset_global_window_times()
+        self.reset_local_window_times()
         self.update_parameters()
         # self.reinitialize_window_controls(self.window_controls)
 
