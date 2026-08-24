@@ -11,7 +11,7 @@ class LossFunctional(BaseLoss):
     # FIXME: There should be a better way to pass the time information
     def __call__(self, control, t_current, t_window):
         total_loss = assemble(
-            (self.control_cost(control) + self.misfit_loss(t_current, t_window))
+            (self.control_cost(control) + self.control_weight*self.misfit_loss(t_current, t_window))
         )
         return total_loss
 
@@ -29,7 +29,7 @@ class LossFunctional(BaseLoss):
         return misfit_loss
 
     def control_cost(self, control):
-        control_cost = self.control_weight * inner(control, control) * dx
+        control_cost = inner(control, control) * dx
         return control_cost
 
     def get_desired_solution(self, t):
@@ -39,4 +39,3 @@ class LossFunctional(BaseLoss):
         return self.u_desired(t)
 
 
-# TODO: Rewrite the LossFunctional class to align with the updated solver and windowing classes
