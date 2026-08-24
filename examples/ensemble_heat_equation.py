@@ -37,7 +37,7 @@ x, y = SpatialCoordinate(mesh)
 alpha = 100.0
 
 
-def initial_condition_expression(x, y, rng=rng, ensemble_member=ensemble_member):
+def initial_condition_expression(x, y, ensemble_member=ensemble_member):
     """Define the initial condition expression."""
     rng = np.random.default_rng(seed=ensemble_member)  # Seed the RNG with the ensemble member rank for reproducibility
     x_offset = rng.normal(loc=0.0, scale=0.2)
@@ -45,10 +45,7 @@ def initial_condition_expression(x, y, rng=rng, ensemble_member=ensemble_member)
     print(f"Ensemble Member {ensemble_member}: Initial condition offsets: x_offset={x_offset}, y_offset={y_offset}")
     return exp(-alpha * (((x - 0.5 + x_offset) ** 2) + ((y - 0.5 + y_offset) ** 2)))
 
-u = Function(V, name=f"False Initial Condition (Ensemble Member {ensemble_member})")
-u.interpolate(initial_condition_expression(x, y, rng=rng))
-output_manager = OutputUtilsEnsemble2D({"Initial Condition" : u}, "./results", vtk_filename="initial_condition", ensemble=my_ensemble)
-output_manager.save_to_vtk()
+
 
 
 def forcing_function_expression(x, y, t):
@@ -66,7 +63,7 @@ def desired_solution_expression(t):
 # Initialize the PDE solver
 heat_solver = HeatEquationSolver(mesh, V, kappa=0.01, dt=0.01)
 # Set initial condition and boundary conditions
-heat_solver.set_initial_condition(initial_condition_expression(x, y))
+heat_solver.set_initial_condition(initial_condition_expression(x, y, ensemble_member=ensemble_member))
 heat_solver.set_bcs([Constant(0.0), Constant(0.0), Constant(0.0), Constant(0.0)])
 heat_solver.build_solver()
 point_wise_error, l2_err, linf_err = heat_solver.errors()
