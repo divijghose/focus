@@ -5,7 +5,24 @@ from firedrake import VTKFile
 from pyadjoint import Tape
 import numpy as np
 import os
+import logging
 from firedrake import FunctionSpace, Function, Constant, SpatialCoordinate
+
+def setup_logger(verbose: bool = False) -> None:
+    """
+    Set up a logger for the application.
+
+    Parameters:
+    verbose (bool): If True, set the logging level to DEBUG. Otherwise, set it to INFO.
+
+    Returns:
+    logging.Logger: Configured logger instance.
+    """
+    logging_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(level=logging_level, format='%(asctime)s - [%(levelname)s]: %(message)s')
+
+def get_logger(name: str) -> logging.Logger: 
+    return logging.getLogger(name)
 
 class OutputUtilsBase:
     """
