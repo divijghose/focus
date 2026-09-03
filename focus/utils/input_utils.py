@@ -46,7 +46,7 @@ def get_ensemble_config():
             print(f"Reading configuration from YAML file: {sys.argv[1]}")
             yaml_file_path = sys.argv[1]
             config: dict = read_yaml_inputs(yaml_file_path)
-            if not config.get("ensemble"):
+            if config.get("ensemble"):
                 ensemble_config["ensemble_size"] = config["ensemble"].get("ensemble_size", 5)
                 ensemble_config["processes_per_member"] = config["ensemble"].get("processes_per_member", 2)
     else: 
