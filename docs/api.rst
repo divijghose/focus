@@ -25,6 +25,29 @@ Solvers
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: focus.solvers.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Functionals
+-----------
+
+.. automodule:: focus.functionals
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.functionals.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.functionals.loss
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Controls
 --------
 
@@ -41,6 +64,21 @@ Optimizers
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: focus.optimizers.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.optimizers.covariance
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.optimizers.tao
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Windowing
 ---------
 
@@ -49,10 +87,50 @@ Windowing
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: focus.windowing.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.windowing.fixed_window
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.windowing.ensemble_fixed_window
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Utilities
 ---------
 
 .. automodule:: focus.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.utils.diagnostics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.utils.error_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.utils.input_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.utils.lib_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.utils.output_utils
    :members:
    :undoc-members:
    :show-inheritance:
