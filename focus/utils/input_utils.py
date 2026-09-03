@@ -10,10 +10,7 @@ def read_petsc_inputs():
     """
     config: dict = {}
     # Console print toggle
-    config["verbose"] = OPTS.getBool("verbose", False)
-
-    # Toggle .pvd output
-    config["pvdOutput"] = OPTS.getBool("--pvd-output", default=True)
+    config["verbose"] = OPTS.getBool("--verbose", False)
 
     # Final time
     config["T"] = OPTS.getReal("--final-time", default=0.01)
@@ -30,9 +27,6 @@ def read_petsc_inputs():
 
     # Output file path
     config["outfile_path"] = OPTS.getString("--outfile-path", default="output")
-
-    # Summary CSV file path
-    config["summary_csv_path"] = OPTS.getString("--summary-csv-path", default="")
 
     # Time decay constant for weighting misfit in the loss functional
     config["decay_constant"] = OPTS.getReal("--decay-constant", default=0.1)
