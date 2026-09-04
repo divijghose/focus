@@ -1,4 +1,5 @@
 from .base import Windowing
+from ..utils.output_utils import get_logger
 from firedrake.function import Function
 from firedrake import Constant
 from pyadjoint import ReducedFunctional
@@ -7,12 +8,15 @@ from pyadjoint import *
 from firedrake.adjoint import *
 import numpy as np
 
+logger = get_logger(__name__)
+
 class FixedWindow(Windowing):
     def __init__(self, window_size, window_stride, pde_solver):
         super().__init__(window_size, window_stride)
         self.pde_solver = pde_solver
         self.functional_value = 0
         self.J = 0
+        logger.debug(f"Initialized FixedWindow with size {window_size} and stride {window_stride}.")
 
     def get_window_start_time(self):
         """
@@ -93,7 +97,7 @@ class FixedWindow(Windowing):
                 for i, m_i in enumerate(control):
                     m_i.interpolate(initial_expression[j])
 
-        print(
+        logger.debug(
             f"Initialized {self.pde_solver.num_controls} control variable(s) for the fixed window with size {self.window_size}."
         )
         return self.window_controls
