@@ -10,6 +10,10 @@ extensions = [
     'sphinx.ext.viewcode',
 ]
 
+autodoc_default_options = {
+    'private-members': True,
+}
+
 templates_path = ['_templates']
 exclude_patterns = ['_build']
 html_theme = 'sphinx_rtd_theme'
