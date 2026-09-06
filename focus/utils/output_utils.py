@@ -8,6 +8,7 @@ import os
 import logging
 from firedrake import FunctionSpace, Function, Constant, SpatialCoordinate
 
+LIBRARY_NAME = "focus"
 def setup_logger(verbose: bool = False) -> None:
     """
     Set up a logger for the application.
@@ -18,11 +19,20 @@ def setup_logger(verbose: bool = False) -> None:
     Returns:
     logging.Logger: Configured logger instance.
     """
+    logger = logging.getLogger(LIBRARY_NAME)
     logging_level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(level=logging_level, format='%(asctime)s - [%(levelname)s]: %(message)s')
+    logger.setLevel(logging_level)
+
+    handler = logging.StreamHandler()
+    handler.setLevel(logging_level)
+    formatter = logging.Formatter('%(message)s')
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+    logger.propagate = False
 
 def get_logger(name: str) -> logging.Logger: 
-    return logging.getLogger(name)
+    return logging.getLogger(f"{LIBRARY_NAME}.{name}")
 
 class OutputUtilsBase:
     """
