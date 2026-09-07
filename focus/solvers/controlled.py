@@ -17,9 +17,9 @@ logger = get_logger(__name__)
 
 
 class ControlledSolver(Solver, ABC):
-    """Library-internal base class for PDE solvers with optimal control support.
+    """Base class for PDE solvers with optimal control support.
 
-    Extends :class:`Solver` with control attachment, a staged build process,
+    Extends :class:`Solver` with control attachment, a build process,
     parameter management, and error computation. Users subclass this when
     implementing a new controlled PDE solver but are not expected to interact
     with the control mechanism directly.
