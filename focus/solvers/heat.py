@@ -37,15 +37,14 @@ class HeatEquationSolver(ControlledSolver):
         \\begin{eqnarray}
         u_t - \\kappa \\, \\Delta u & = & f + m,
             \\qquad \\text{in} \\quad \\Omega \\times (0, T] \\\\
-        u & = & g,
+        u & = & g + m_\\Gamma,
             \\qquad \\text{on} \\quad \\partial\\Omega \\times (0, T] \\\\
         u(\\cdot, 0) & = & u_0,
             \\qquad \\text{in} \\quad \\Omega
         \\end{eqnarray}
 
-    where :math:`m` is an optional distributed control.
-
-   
+    where :math:`m` is an optional distributed control and
+    :math:`m_\\Gamma` is an optional Dirichlet boundary control.
 
     """
 
@@ -68,7 +67,9 @@ class HeatEquationSolver(ControlledSolver):
         :raises ValueError: If kappa is not positive.
         """
         if kappa <= 0:
-            raise ValueError(f"Thermal diffusivity kappa must be positive, got {kappa}.")
+            raise ValueError(
+                f"Thermal diffusivity kappa must be positive, got {kappa}."
+            )
         super().__init__(mesh, function_space, dt)
         self.kappa: float = kappa
         self.f: Function = Function(self.V, name="Forcing function")
@@ -114,14 +115,16 @@ class HeatEquationSolver(ControlledSolver):
     def set_initial_condition(self, u0=Constant(0.0)) -> None:
         """Set the initial condition for the state variable.
 
-        Initialises both :attr:`u_new` and the parameter field :attr:`p`
-        from the given expression.
+        Initialises :attr:`u_old`, :attr:`u_new`, and the parameter field
+        :attr:`p` from the given expression. All three are set consistently
+        so the first window starts from a well-defined state.
 
         :param u0: A Firedrake expression or Constant for the initial state.
         """
+        self.u_old.interpolate(u0)
         self.u_new.interpolate(u0)
         self.p.interpolate(u0)
-        logger.debug("Initial condition set.")
+        logger.debug("Initial condition set on u_old, u_new, and p.")
 
     def set_bcs(self, bcs: list | None = None) -> None:
         """Set the static Dirichlet boundary conditions.
@@ -132,8 +135,7 @@ class HeatEquationSolver(ControlledSolver):
         build time.
 
         :param bcs: A list of Firedrake expressions or Constants, one per
-            subdomain boundary. Defaults to homogeneous Dirichlet on all
-            boundaries if None.
+            subdomain boundary. Defaults to no BCs if None.
         :type bcs: list or None
         """
         if bcs is None:
@@ -148,13 +150,17 @@ class HeatEquationSolver(ControlledSolver):
         ]
         logger.debug(f"Set {len(self.bcs)} static boundary condition(s).")
 
+ 
 
     def _build_forms(self) -> None:
         """Assemble the bilinear and linear forms for the heat equation.
 
-        Defines trial and test functions, the bilinear form :attr:`a`,
-        and the linear form :attr:`L`. Controls append to :attr:`L`
-        after this method returns.
+        Uses :attr:`u_old` in the linear form to carry the solution forward
+        within each window. :attr:`u_old` is assigned from :attr:`p` at the
+        start of each window in :meth:`run_first_window`, anchoring the tape
+        to the window initial condition.
+
+        Controls append to :attr:`L` after this method returns.
         """
         self.u = TrialFunction(self.V)
         self.v = TestFunction(self.V)
@@ -164,6 +170,9 @@ class HeatEquationSolver(ControlledSolver):
             + self.dt * self.kappa * inner(grad(self.u), grad(self.v))
         ) * dx
 
+        # u_old carries the solution forward within the window.
+        # p anchors the tape as the window initial condition via
+        # Jhat.update_parameters between windows.
         self.L = (
             inner(self.u_old, self.v)
             + self.dt * inner(self.f, self.v)
@@ -200,3 +209,13 @@ class HeatEquationSolver(ControlledSolver):
             )
         self.u_old.assign(self.u_new)
         self.solver.solve()
+
+    def set_parameters(self) -> None:
+        """Update the parameter field from the current solution.
+
+        Assigns :attr:`u_new` into :attr:`p` after the stride has been
+        executed. This makes :attr:`p` the correct initial condition for
+        the next window, ready to be passed to ``Jhat.update_parameters``.
+        """
+        self.p.assign(self.u_new)
+        logger.debug("Parameter field p updated from u_new.")
