@@ -1,16 +1,12 @@
 focus documentation
 ===================
 
-.. automodule:: focus
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Contents:
----------
+This is a dummy note on the library.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: API Reference
+   :maxdepth: 1
+   :hidden:
 
    api
+
+:doc:`API reference <api>`
