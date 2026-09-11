@@ -6,8 +6,8 @@ from pyadjoint import (
     ReducedFunctional,
     Tape,
     continue_annotation,
+    get_working_tape,
     pause_annotation,
-    set_working_tape,
 )
 
 from ..utils.output_utils import get_logger
@@ -61,8 +61,8 @@ class TapeManager:
         Replaces any existing tape. Called at the start of the first
         window forward pass.
         """
-        self._tape = set_working_tape(Tape())
         continue_annotation()
+        self._tape = get_working_tape()
         logger.debug("Tape started and annotation resumed.")
 
     def pause(self) -> None:
@@ -117,3 +117,14 @@ class TapeManager:
         """
         self.Jhat.update_parameters(parameters)
         logger.debug("Reduced functional parameters updated.")
+
+    def visualise_tape(self, filename: str = "tape_graph.pdf") -> None:
+        """Visualize the current tape as a graph.
+
+        :param filename: The base filename for the output graph (without extension).
+        :type filename: str
+        :raises RuntimeError: If no tape has been created yet.
+        """
+        _ = self.tape  # raises if no tape exists
+        self._tape.visualise(filename)
+        logger.debug(f"Tape visualized and saved to '{filename}.png'.")
