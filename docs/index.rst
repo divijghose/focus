@@ -1,4 +1,4 @@
-focus documentation
+Firedrake for Optimal Control and Uncertainty quantification with Stochastic PDEs
 ===================
 
 This is a dummy note on the library.
