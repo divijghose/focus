@@ -113,9 +113,9 @@ class FixedWindow(Windowing):
             for i in range(self.window_size):
                 if self.pde_solver.num_controls > 1:
                     for j in range(self.pde_solver.num_controls):
-                        self.pde_solver.control[j].assign(self.window_controls[j][i])
+                        self.pde_solver.controls[j].assign(self.window_controls[j][i])
                 else:
-                    self.pde_solver.control.assign(self.window_controls[i])
+                    self.pde_solver.controls.assign(self.window_controls[i])
                 self.pde_solver.update_forcing_function(self.global_hop_time)
                 self.pde_solver.solve()
             # Add the "loss" functional
