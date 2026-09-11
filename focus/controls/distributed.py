@@ -19,11 +19,6 @@ class DistributedControl(ControlBase):
 
         L \\mathrel{+}= \\Delta t \\int_{\\Omega} m \\, v \\, \\mathrm{d}x
 
-    where :math:`m` is the control field interpolated onto the state space,
-    and :math:`v` is the test function. The control is defined on a dedicated
-    function space :math:`V_c`, which may differ from the state space
-    :math:`V` in polynomial degree, and is interpolated onto :math:`V` before
-    entering the weak form.
     """
 
     def __init__(self, function_space: WithGeometry, name: str = "distributed_control"):
@@ -86,5 +81,5 @@ class DistributedControl(ControlBase):
         :raises RuntimeError: If the control has not yet been applied to a solver.
         """
         _ = self.control_on_V  # triggers the RuntimeError if not applied
-        self._control_on_V.interpolate(self._function)  # ty: ignore[unresolved-attribute]
+        self._control_on_V.interpolate(self._function)  
         logger.debug(f"Synced distributed control '{self._name}' onto state space.")
