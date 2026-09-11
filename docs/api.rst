@@ -20,15 +20,22 @@ Solvers
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: focus.solvers.heat_equation
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 .. automodule:: focus.solvers.base
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. automodule:: focus.solvers.controlled
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.solvers.heat
+   :members:
+   :undoc-members:
+   :show-inheritance: true
+
+
 
 Functionals
 -----------
@@ -46,7 +53,7 @@ Functionals
 .. automodule:: focus.functionals.loss
    :members:
    :undoc-members:
-   :show-inheritance:
+   :show-inheritance: true
 
 Controls
 --------
@@ -55,6 +62,21 @@ Controls
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. automodule:: focus.controls.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: focus.controls.distributed
+   :members:
+   :undoc-members:
+   :show-inheritance: true
+
+.. automodule:: focus.controls.dirichlet
+   :members:
+   :undoc-members:
+   :show-inheritance: true
 
 Optimizers
 ----------
@@ -92,15 +114,12 @@ Windowing
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: focus.windowing.fixed_window
+.. automodule:: focus.windowing.windowing
    :members:
    :undoc-members:
-   :show-inheritance:
+   :show-inheritance: true
 
-.. automodule:: focus.windowing.ensemble_fixed_window
-   :members:
-   :undoc-members:
-   :show-inheritance:
+
 
 Utilities
 ---------
