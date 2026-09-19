@@ -229,3 +229,6 @@ share/*
 *.eps
 *.jpg
 *.pvtu
+results/
+*.txt
+
