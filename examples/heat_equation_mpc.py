@@ -14,14 +14,17 @@ Problem setup:
     - BCs:       homogeneous Dirichlet on all boundaries
 """
 
+import os
+
+import numpy as np
 from firedrake import (
     Constant,
+    Function,
     FunctionSpace,
     SpatialCoordinate,
     UnitSquareMesh,
     VTKFile,
     exp,
-    Function
 )
 
 from focus.controls.distributed import DistributedControl
@@ -149,6 +152,7 @@ optimizer = TAOOptimizer(windowing.Jhat, parameters=parameters_tao)
 # ---------------------------------------------------------------------------
 
 vtk_file = VTKFile("./results/heat_equation_mpc.pvd")
+text_output_dir = "./results/heat_equation_mpc_text"
 
 desired_plot = Function(V, name="Desired solution")
 def save_output(t: float) -> None:
@@ -164,6 +168,45 @@ def save_output(t: float) -> None:
         desired_plot,
         t=t,
     )
+
+
+def save_output_text(t: float) -> None:
+    """Save the output fields as timestamped text files with coordinates."""
+    os.makedirs(text_output_dir, exist_ok=True)
+    timestamp = f"{t:.12g}".replace("-", "m").replace(".", "p")
+
+    fields = {
+        "Solution":         heat_solver.u_new,
+        "Control":          windowing.window_controls[0][0],
+        "Pointwise_error":  heat_solver.point_wise_error,
+        "Desired_solution": desired_plot,
+    }
+
+    for field_name, field in fields.items():
+        # Get the coordinates of each DOF in the field's function space
+        V    = field.function_space()
+        coords = V.mesh().coordinates.dat.data_ro          # shape (N, 2)
+        # For higher-order spaces (e.g. CG2) the coordinate array above
+        # only has mesh vertex coords. Use interpolation to get DOF coords.
+        from firedrake import interpolate, VectorFunctionSpace
+        W      = VectorFunctionSpace(V.mesh(), V.ufl_element().family(),
+                                     V.ufl_element().degree())
+        xy     = Function(W)
+        xy.interpolate(V.mesh().coordinates)
+        xy_arr = xy.dat.data_ro                            # shape (N, 2)
+
+        values = np.asarray(field.dat.data_ro).reshape(-1, 1)  # shape (N, 1)
+        out    = np.hstack([xy_arr, values])                   # shape (N, 3)
+
+        filename = os.path.join(text_output_dir, f"{field_name}_{timestamp}.txt")
+        np.savetxt(
+            filename, out,
+            header=f"{field_name} at t={t}  columns: x  y  value",
+        )
+
+
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -194,4 +237,5 @@ while t < config.t_max:
     windowing.reinitialize_window_controls(optimal_controls)
 
     save_output(t)
+    save_output_text(t)
 
